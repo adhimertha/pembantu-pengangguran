@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 
 	"backend-go/services"
 
@@ -26,23 +27,20 @@ func (ctrl *CVController) Upload(c *gin.Context) {
 		return
 	}
 
-	// Validate file type (e.g., PDF)
-	if file.Header.Get("Content-Type") != "application/pdf" {
+	if !strings.HasSuffix(strings.ToLower(file.Filename), ".pdf") {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Only PDF files are supported currently"})
 		return
 	}
 
-	// Extract text from PDF
-	text, err := ctrl.cvService.ExtractText(file)
+	text, fileURL, err := ctrl.cvService.UploadAndExtractText(c.Request.Context(), file)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to extract text from CV"})
 		return
 	}
 
-	// For simplicity, return the extracted text and file details
-	// In a real app, we might store the text and file in a DB
 	c.JSON(http.StatusOK, gin.H{
 		"filename":       file.Filename,
+		"file_url":       fileURL,
 		"extracted_text": text,
 		"message":        "CV uploaded and parsed successfully",
 	})

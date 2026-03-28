@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"backend-go/config"
 	"backend-go/controllers"
@@ -11,6 +12,7 @@ import (
 	"backend-go/routes"
 	"backend-go/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,12 +38,17 @@ func main() {
 	}
 
 	// Initialize services
-	aiService, err := services.NewAIService(ctx, cfg.GeminiAPIKey)
+	aiService, err := services.NewAIService(ctx, cfg.GeminiAPIKey, cfg.GeminiModel)
 	if err != nil {
 		log.Fatal("Failed to initialize AI service: ", err)
 	}
-	cvService := services.NewCVService("./uploads/cv")
-	audioService := services.NewAudioService("./uploads/audio", 25*1024*1024)
+	var storage *services.SupabaseStorage
+	if cfg.SupabaseURL != "" && cfg.SupabaseKey != "" {
+		storage = services.NewSupabaseStorage(cfg.SupabaseURL, cfg.SupabaseKey)
+	}
+
+	cvService := services.NewCVService("./uploads/cv", storage, cfg.CVBucket)
+	audioService := services.NewAudioService("./uploads/audio", 25*1024*1024, storage, cfg.AudioBucket)
 
 	// Initialize controllers
 	interviewCtrl := controllers.NewInterviewController(aiService, audioService)
@@ -50,6 +57,16 @@ func main() {
 
 	// Initialize Gin router
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"http://localhost:60731",
+			"http://127.0.0.1:60731",
+		},
+		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization", "apikey", "x-upsert"},
+		MaxAge:       12 * time.Hour,
+	}))
 
 	// Register routes
 	routes.RegisterRoutes(r, interviewCtrl, cvCtrl, audioCtrl)

@@ -27,7 +27,7 @@ func (ctrl *AudioController) Transcribe(c *gin.Context) {
 		return
 	}
 
-	audioPath, mimeType, data, err := ctrl.audioService.StoreAndRead(file)
+	audioPath, mimeType, data, err := ctrl.audioService.StoreAndRead(c.Request.Context(), file)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to process audio file"})
 		return

@@ -28,7 +28,6 @@ Uploads a CV in PDF format and returns the extracted text. This text should then
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `filename` | `string` | Name of the uploaded file. |
-| `file_url` | `string` | Public URL of the stored CV file (if storage configured). |
 | `extracted_text` | `string` | The plain text content extracted from the PDF. |
 | `message` | `string` | Success message. |
 
@@ -36,7 +35,6 @@ Uploads a CV in PDF format and returns the extracted text. This text should then
 ```json
 {
   "filename": "cv_alex_dev.pdf",
-  "file_url": "https://your-project.supabase.co/storage/v1/object/public/cv/cv/....pdf",
   "extracted_text": "Experienced Go Developer with 5 years in fintech...",
   "message": "CV uploaded and parsed successfully"
 }
@@ -174,7 +172,7 @@ Uploads a recorded answer, transcribes it using Gemini, saves it, and continues 
   "analysis": {
     "transcript": "I would use Redis with a token bucket approach ...",
     "analysis": { "clarity": 0.86, "detail": 0.74, "relevance": 0.9, "is_complete": false },
-    "audio_path": "https://your-project.supabase.co/storage/v1/object/public/audio/audio/....webm"
+    "audio_path": "./uploads/audio/2c2a79a8-acde-4f3a-acde-2d5b3a4c9c0f.webm"
   },
   "is_complete": false
 }
@@ -253,13 +251,13 @@ Uploads an audio file and returns a transcript (useful if frontend wants to call
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `transcript` | `string` | Extracted transcript text. |
-| `audio_path` | `string` | Public URL of the stored audio file (if storage configured). |
+| `audio_path` | `string` | Stored local file path (temporary implementation). |
 
 **Example Response:**
 ```json
 {
   "transcript": "I would use Redis with a token bucket approach ...",
-  "audio_path": "https://your-project.supabase.co/storage/v1/object/public/audio/audio/....webm"
+  "audio_path": "./uploads/audio/2c2a79a8-acde-4f3a-acde-2d5b3a4c9c0f.webm"
 }
 ```
 

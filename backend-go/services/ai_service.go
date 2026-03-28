@@ -13,22 +13,77 @@ import (
 )
 
 type AIService struct {
-	client *genai.Client
+	client    *genai.Client
+	modelName string
 }
 
-func NewAIService(ctx context.Context, apiKey string) (*AIService, error) {
+func NewAIService(ctx context.Context, apiKey string, modelName string) (*AIService, error) {
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create gemini client: %w", err)
 	}
+	if strings.TrimSpace(modelName) == "" {
+		modelName = "gemini-1.5-flash-001"
+	}
+
+	if _, err := client.GenerativeModel(modelName).Info(ctx); err != nil {
+		selected, selErr := selectFirstWorkingModel(ctx, client)
+		if selErr != nil {
+			return nil, fmt.Errorf("gemini model not usable (%s): %w", modelName, err)
+		}
+		modelName = selected
+	}
+
 	return &AIService{
-		client: client,
+		client:    client,
+		modelName: modelName,
 	}, nil
+}
+
+func selectFirstWorkingModel(ctx context.Context, client *genai.Client) (string, error) {
+	it := client.ListModels(ctx)
+	for {
+		mi, err := it.Next()
+		if err != nil {
+			break
+		}
+
+		ok := false
+		for _, m := range mi.SupportedGenerationMethods {
+			if m == "generateContent" {
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			continue
+		}
+
+		candidates := []string{}
+		if mi.BaseModelID != "" {
+			candidates = append(candidates, mi.BaseModelID)
+		}
+		if mi.Name != "" {
+			candidates = append(candidates, strings.TrimPrefix(mi.Name, "models/"))
+			candidates = append(candidates, mi.Name)
+		}
+
+		for _, name := range candidates {
+			name = strings.TrimSpace(name)
+			if name == "" {
+				continue
+			}
+			if _, err := client.GenerativeModel(name).Info(ctx); err == nil {
+				return name, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("no usable model found")
 }
 
 // GeneratePersona generates a detailed persona based on job spec and company type
 func (s *AIService) GeneratePersona(ctx context.Context, jobSpec string, companyType models.CompanyType) (models.InterviewerPersona, error) {
-	model := s.client.GenerativeModel("gemini-1.5-flash")
+	model := s.client.GenerativeModel(s.modelName)
 	model.ResponseMIMEType = "application/json"
 
 	prompt := fmt.Sprintf(
@@ -60,7 +115,7 @@ func (s *AIService) GeneratePersona(ctx context.Context, jobSpec string, company
 
 // GenerateQuestion generates the next interview question based on persona, CV, and conversation history
 func (s *AIService) GenerateQuestion(ctx context.Context, persona models.InterviewerPersona, cvText string, history []string) (string, error) {
-	model := s.client.GenerativeModel("gemini-1.5-flash")
+	model := s.client.GenerativeModel(s.modelName)
 
 	systemPrompt := fmt.Sprintf(
 		"You are %s, described as: %s. Your interview style is %s. "+
@@ -109,7 +164,7 @@ func (s *AIService) GenerateQuestion(ctx context.Context, persona models.Intervi
 
 // AnalyzeResponse provides feedback on a single user response
 func (s *AIService) AnalyzeResponse(ctx context.Context, question string, response string) (map[string]interface{}, bool, error) {
-	model := s.client.GenerativeModel("gemini-1.5-flash")
+	model := s.client.GenerativeModel(s.modelName)
 	model.ResponseMIMEType = "application/json"
 
 	prompt := fmt.Sprintf(
@@ -140,7 +195,7 @@ func (s *AIService) AnalyzeResponse(ctx context.Context, question string, respon
 }
 
 func (s *AIService) GenerateFeedback(ctx context.Context, session models.InterviewSession, questions []models.InterviewQuestion, responses []models.InterviewResponse) (models.FeedbackResponse, error) {
-	model := s.client.GenerativeModel("gemini-1.5-flash")
+	model := s.client.GenerativeModel(s.modelName)
 	model.ResponseMIMEType = "application/json"
 
 	type qa struct {
@@ -221,7 +276,7 @@ func (s *AIService) GenerateFeedback(ctx context.Context, session models.Intervi
 }
 
 func (s *AIService) TranscribeAudio(ctx context.Context, mimeType string, audioData []byte) (string, error) {
-	model := s.client.GenerativeModel("gemini-1.5-flash")
+	model := s.client.GenerativeModel(s.modelName)
 
 	resp, err := model.GenerateContent(
 		ctx,

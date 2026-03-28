@@ -2,6 +2,7 @@ package services
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -15,17 +16,21 @@ import (
 type AudioService struct {
 	uploadDir string
 	maxBytes  int64
+	storage   *SupabaseStorage
+	bucket    string
 }
 
-func NewAudioService(uploadDir string, maxBytes int64) *AudioService {
+func NewAudioService(uploadDir string, maxBytes int64, storage *SupabaseStorage, bucket string) *AudioService {
 	_ = os.MkdirAll(uploadDir, 0755)
 	return &AudioService{
 		uploadDir: uploadDir,
 		maxBytes:  maxBytes,
+		storage:   storage,
+		bucket:    bucket,
 	}
 }
 
-func (s *AudioService) StoreAndRead(file *multipart.FileHeader) (string, string, []byte, error) {
+func (s *AudioService) StoreAndRead(ctx context.Context, file *multipart.FileHeader) (string, string, []byte, error) {
 	src, err := file.Open()
 	if err != nil {
 		return "", "", nil, fmt.Errorf("failed to open uploaded file: %w", err)
@@ -57,7 +62,18 @@ func (s *AudioService) StoreAndRead(file *multipart.FileHeader) (string, string,
 	if ext == "" {
 		ext = ".bin"
 	}
+
 	filename := uuid.New().String() + ext
+
+	if s.storage != nil && s.bucket != "" {
+		objectPath := "audio/" + filename
+		publicURL, _, err := s.storage.Upload(ctx, s.bucket, objectPath, mimeType, buf.Bytes())
+		if err != nil {
+			return "", "", nil, err
+		}
+		return publicURL, mimeType, buf.Bytes(), nil
+	}
+
 	destPath := filepath.Join(s.uploadDir, filename)
 	if err := os.WriteFile(destPath, buf.Bytes(), 0644); err != nil {
 		return "", "", nil, fmt.Errorf("failed to store uploaded file: %w", err)
@@ -65,4 +81,3 @@ func (s *AudioService) StoreAndRead(file *multipart.FileHeader) (string, string,
 
 	return destPath, mimeType, buf.Bytes(), nil
 }
-

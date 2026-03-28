@@ -94,8 +94,8 @@ func setupRouter(t *testing.T, uploadDir string, llm *fakeLLM) *gin.Engine {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 
-	cvService := services.NewCVService(filepath.Join(uploadDir, "cv"))
-	audioService := services.NewAudioService(filepath.Join(uploadDir, "audio"), 25*1024*1024)
+	cvService := services.NewCVService(filepath.Join(uploadDir, "cv"), nil, "")
+	audioService := services.NewAudioService(filepath.Join(uploadDir, "audio"), 25*1024*1024, nil, "")
 
 	interviewCtrl := controllers.NewInterviewController(llm, audioService)
 	cvCtrl := controllers.NewCVController(cvService)

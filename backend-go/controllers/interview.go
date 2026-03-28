@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -37,6 +38,7 @@ func (ctrl *InterviewController) StartInterview(c *gin.Context) {
 	// 1. Generate Persona
 	persona, err := ctrl.aiService.GeneratePersona(ctx, req.JobSpec, req.CompanyType)
 	if err != nil {
+		log.Printf("GeneratePersona error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate persona"})
 		return
 	}
@@ -44,6 +46,7 @@ func (ctrl *InterviewController) StartInterview(c *gin.Context) {
 	// 2. Generate First Question
 	firstQuestion, err := ctrl.aiService.GenerateQuestion(ctx, persona, req.CVText, nil)
 	if err != nil {
+		log.Printf("GenerateQuestion(first) error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate first question"})
 		return
 	}
@@ -182,7 +185,7 @@ func (ctrl *InterviewController) RespondToInterviewAudio(c *gin.Context) {
 		return
 	}
 
-	audioPath, mimeType, data, err := ctrl.audioService.StoreAndRead(file)
+	audioPath, mimeType, data, err := ctrl.audioService.StoreAndRead(c.Request.Context(), file)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to process audio file"})
 		return
