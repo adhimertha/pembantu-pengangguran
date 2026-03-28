@@ -1,0 +1,102 @@
+<section class="upload container animate-fade-in">
+  <div class="card upload__card">
+    <header class="upload__header">
+      <h2>Setup Your Simulation</h2>
+      <p>Provide your background to generate your AI interviewer persona.</p>
+    </header>
+
+    <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="upload__form">
+      <div class="field">
+        <label>1. Upload your CV (PDF / DOCX)</label>
+        <div
+          class="dropzone"
+          [class.is-selected]="uploadForm.get('cv')?.value"
+          [class.is-selected-border]="uploadForm.get('cv')?.value"
+        >
+          <input type="file" (change)="onFileChange($event)" accept=".pdf,.docx" />
+
+          <div class="dropzone__content">
+            <div class="dropzone__icon" aria-hidden="true">📄</div>
+
+            <div *ngIf="!uploadForm.get('cv')?.value">
+              <div class="dropzone__title">Click to select your CV</div>
+              <div class="dropzone__hint muted">PDF or DOCX (max 10MB)</div>
+            </div>
+
+            <div *ngIf="uploadForm.get('cv')?.value" class="dropzone__selected">
+              <span class="dropzone__ok" aria-hidden="true">✓</span>
+              <span>{{ uploadForm.get('cv')?.value.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="jobSpec">2. Job Description</label>
+        <div class="field__stack">
+          <textarea
+            id="jobSpec"
+            formControlName="jobSpec"
+            rows="6"
+            class="input textarea"
+            placeholder="Paste the job responsibilities and requirements here..."
+          ></textarea>
+          <div
+            class="field__hint"
+            [class.is-error]="
+              uploadForm.get('jobSpec')?.invalid && uploadForm.get('jobSpec')?.touched
+            "
+          >
+            Min. 50 characters ({{ uploadForm.get('jobSpec')?.value?.length || 0 }})
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label>3. Company Context</label>
+          <select formControlName="companyType" class="input select">
+            <option value="startup">Agile Startup (Fast-paced)</option>
+            <option value="bigtech">Big Tech (FAANG Style)</option>
+            <option value="corporate">Large Corporate (Process Driven)</option>
+            <option value="agency">Agency / Consulting</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>4. Difficulty Level</label>
+          <div class="segmented">
+            <button
+              type="button"
+              (click)="uploadForm.patchValue({ difficulty: 'easy' })"
+              class="segmented__btn"
+              [class.is-active]="uploadForm.get('difficulty')?.value === 'easy'"
+            >
+              Easy
+            </button>
+            <button
+              type="button"
+              (click)="uploadForm.patchValue({ difficulty: 'medium' })"
+              class="segmented__btn"
+              [class.is-active]="uploadForm.get('difficulty')?.value === 'medium'"
+            >
+              Medium
+            </button>
+            <button
+              type="button"
+              (click)="uploadForm.patchValue({ difficulty: 'hard' })"
+              class="segmented__btn"
+              [class.is-active]="uploadForm.get('difficulty')?.value === 'hard'"
+            >
+              Hard
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="uploadForm.invalid" class="btn btn--primary upload__submit">
+        Initialize AI Interviewer
+      </button>
+    </form>
+  </div>
+</section>

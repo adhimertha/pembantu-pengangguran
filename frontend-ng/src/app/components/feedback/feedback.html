@@ -1,0 +1,106 @@
+<section class="feedback container animate-fade-in">
+  <div class="card feedback__header">
+    <div class="feedback__headerInner">
+      <div class="feedback__title">
+        <h2>Interview Performance Report</h2>
+        <p class="muted">
+          Session ID: <span class="feedback__mono">{{ sessionId }}</span> • Completed on
+          {{ today | date: 'mediumDate' }}
+        </p>
+      </div>
+
+      <div class="feedback__score">
+        <div>
+          <div class="feedback__scoreLabel">Overall Score</div>
+          <div class="feedback__scoreValue">
+            <span class="feedback__scoreNumber">{{ feedback.overallScore }}</span>
+            <span class="feedback__scoreOutOf">/100</span>
+          </div>
+        </div>
+        <div
+          class="feedback__scoreEmoji"
+          [class.is-good]="feedback.overallScore >= 70"
+          [class.is-ok]="feedback.overallScore < 70"
+        >
+          {{ feedback.overallScore >= 70 ? '🎉' : '💪' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback__grid">
+    <div class="feedback__main">
+      <div class="card feedback__section">
+        <h3 class="feedback__sectionTitle">Skill Analysis</h3>
+
+        <div class="feedback__cats">
+          @for (cat of feedback.categories; track cat.name) {
+            <div class="cat">
+              <div class="cat__top">
+                <h4 class="cat__name">{{ cat.name }}</h4>
+                <div class="cat__score">{{ cat.score }}%</div>
+              </div>
+
+              <div class="progress">
+                <div
+                  class="progress__bar"
+                  [class.is-high]="cat.score >= 80"
+                  [style.width.%]="cat.score"
+                ></div>
+              </div>
+
+              <div class="cat__analysis muted">"{{ cat.analysis }}"</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="feedback__twoCol">
+        <div class="card box box--good">
+          <h4 class="box__title">Top Strengths</h4>
+          <ul class="box__list">
+            @for (s of feedback.strengths; track s) {
+              <li class="box__item">
+                <span class="box__bullet box__bullet--good" aria-hidden="true">✓</span>
+                <span>{{ s }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <div class="card box box--ok">
+          <h4 class="box__title">Action Items</h4>
+          <ul class="box__list">
+            @for (w of feedback.improvements; track w) {
+              <li class="box__item">
+                <span class="box__bullet box__bullet--ok" aria-hidden="true">→</span>
+                <span>{{ w }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <aside class="feedback__side">
+      <div class="card feedback__actions">
+        <h3 class="feedback__actionsTitle">What's Next?</h3>
+        <div class="feedback__buttons">
+          <button routerLink="/upload" class="btn btn--primary" type="button">
+            Start New Session
+          </button>
+          <button class="btn btn--secondary" type="button">Download Detailed PDF</button>
+        </div>
+
+        <div class="feedback__share">
+          <div class="feedback__shareTitle">Share Performance</div>
+          <div class="feedback__shareButtons">
+            <button class="btn btn--secondary feedback__shareBtn" type="button">🐦</button>
+            <button class="btn btn--secondary feedback__shareBtn" type="button">💼</button>
+            <button class="btn btn--secondary feedback__shareBtn" type="button">🔗</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>

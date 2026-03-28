@@ -1,0 +1,132 @@
+.home {
+  position: relative;
+  overflow: hidden;
+  padding: 72px 0 60px;
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+}
+
+.home__content {
+  position: relative;
+  text-align: center;
+}
+
+.home__glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 999px;
+  filter: blur(120px);
+  opacity: 0.55;
+}
+
+.home__glow--one {
+  top: -140px;
+  right: -180px;
+  background: #bfdbfe;
+}
+
+.home__glow--two {
+  bottom: -160px;
+  left: -180px;
+  background: #c7d2fe;
+}
+
+.home__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+
+.home__title {
+  margin: 18px 0 16px;
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+.home__titleAccent {
+  background: linear-gradient(90deg, #2563eb, #4f46e5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.home__subtitle {
+  margin: 0 auto 26px;
+  max-width: 840px;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.home__cta {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.home__features {
+  margin-top: 46px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.feature {
+  padding: 26px;
+  text-align: left;
+}
+
+.feature__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  margin-bottom: 14px;
+  color: #ffffff;
+}
+
+.feature__icon--blue {
+  background: #2563eb;
+}
+
+.feature__icon--green {
+  background: #10b981;
+}
+
+.feature__icon--purple {
+  background: #7c3aed;
+}
+
+.feature__title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+@media (max-width: 900px) {
+  .home__title {
+    font-size: 40px;
+  }
+
+  .home__features {
+    grid-template-columns: 1fr;
+  }
+}

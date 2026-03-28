@@ -1,0 +1,57 @@
+<section class="interview container animate-fade-in">
+  <div class="card interview__card">
+    <header class="interview__header">
+      <div class="interview__persona">
+        <div class="interview__avatar" aria-hidden="true">{{ persona.avatar }}</div>
+        <div class="interview__personaText">
+          <div class="interview__name">{{ persona.name }}</div>
+          <div class="interview__role">{{ persona.role }} • {{ persona.company }}</div>
+        </div>
+      </div>
+
+      <div class="interview__actions">
+        <button class="btn btn--secondary" type="button" (click)="endInterview()">Finish</button>
+      </div>
+    </header>
+
+    <div class="interview__chat">
+      @for (msg of messages; track msg.id) {
+        <div
+          class="msg"
+          [class.msg--ai]="msg.sender === 'ai'"
+          [class.msg--user]="msg.sender === 'user'"
+        >
+          <div class="msg__bubble">
+            <div class="msg__text">{{ msg.text }}</div>
+            <div class="msg__time">{{ msg.timestamp | date: 'HH:mm' }}</div>
+          </div>
+        </div>
+      }
+
+      <div class="msg msg--ai" *ngIf="isTyping">
+        <div class="msg__bubble">
+          <div class="typing"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="interview__composer">
+      <textarea
+        [(ngModel)]="userInput"
+        (keyup.enter)="sendMessage()"
+        rows="2"
+        class="input interview__textarea"
+        placeholder="Type your response..."
+      ></textarea>
+
+      <button
+        class="btn btn--primary interview__send"
+        type="button"
+        (click)="sendMessage()"
+        [disabled]="!userInput.trim() || isTyping"
+      >
+        Send
+      </button>
+    </footer>
+  </div>
+</section>
