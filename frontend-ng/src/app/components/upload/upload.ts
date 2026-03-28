@@ -34,9 +34,8 @@ export class Upload {
 
   onSubmit() {
     if (this.uploadForm.valid) {
-      console.log('Form Submitted:', this.uploadForm.value);
-      // Simulate API call and redirect to interview
-      this.router.navigate(['/interview', 'session-123']);
+      const sessionId = `s-${Date.now()}`;
+      this.router.navigate(['/interview', sessionId]);
     }
   }
 }

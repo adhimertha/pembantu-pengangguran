@@ -13,6 +13,14 @@ interface FeedbackData {
   improvements: string[];
 }
 
+type StoredSession = {
+  id: string;
+  createdAt: string;
+  overallScore: number;
+};
+
+const STORAGE_KEY = 'aiit:sessions';
+
 @Component({
   selector: 'app-feedback',
   standalone: true,
@@ -61,5 +69,30 @@ export class Feedback implements OnInit {
 
   ngOnInit() {
     this.sessionId = this.route.snapshot.paramMap.get('id');
+    if (this.sessionId) {
+      this.saveSession({
+        id: this.sessionId,
+        createdAt: new Date().toISOString(),
+        overallScore: this.feedback.overallScore,
+      });
+    }
+  }
+
+  private saveSession(session: StoredSession) {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const existing = raw ? (JSON.parse(raw) as unknown) : [];
+      const list = Array.isArray(existing) ? (existing as StoredSession[]) : [];
+
+      const normalized: StoredSession = {
+        id: String(session.id),
+        createdAt: String(session.createdAt),
+        overallScore: Math.max(0, Math.min(100, Number(session.overallScore))),
+      };
+
+      const withoutSameId = list.filter((s) => (s as StoredSession).id !== normalized.id);
+      const next = [normalized, ...withoutSameId].slice(0, 50);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {}
   }
 }

@@ -1,0 +1,68 @@
+<section class="dashboard container animate-fade-in">
+  <header class="dashboard__top">
+    <div>
+      <h1 class="dashboard__title">Progress Dashboard</h1>
+      <p class="muted dashboard__subtitle">Track your improvement across interview sessions.</p>
+    </div>
+
+    <div class="dashboard__actions">
+      <a routerLink="/upload" class="btn btn--primary">Start New Session</a>
+    </div>
+  </header>
+
+  <div class="dashboard__grid">
+    <div class="card dashboard__card">
+      <div class="dashboard__cardTitle">Overview</div>
+
+      <div class="dashboard__stats" *ngIf="hasSessions; else emptyStats">
+        <div class="stat">
+          <div class="stat__label">Sessions</div>
+          <div class="stat__value">{{ sessions.length }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Average</div>
+          <div class="stat__value">{{ averageScore }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Best</div>
+          <div class="stat__value">{{ bestScore }}</div>
+        </div>
+      </div>
+
+      <ng-template #emptyStats>
+        <div class="dashboard__empty muted">
+          No sessions yet. Start an interview to see your progress here.
+        </div>
+      </ng-template>
+
+      <div class="dashboard__chart" *ngIf="hasSessions">
+        <svg viewBox="0 0 320 110" role="img" aria-label="Score trend chart">
+          <polyline class="chart__line" [attr.points]="chartPoints"></polyline>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card dashboard__card">
+      <div class="dashboard__cardTitle">Recent Sessions</div>
+
+      <div *ngIf="hasSessions; else emptyList" class="sessionList">
+        @for (s of sessions.slice(0, 8); track s.id) {
+          <a class="session" [routerLink]="['/feedback', s.id]">
+            <div class="session__left">
+              <div class="session__id">Session {{ s.id }}</div>
+              <div class="session__date muted">{{ s.createdAt | date: 'mediumDate' }}</div>
+            </div>
+            <div class="session__score">{{ s.overallScore }}</div>
+          </a>
+        }
+      </div>
+
+      <ng-template #emptyList>
+        <div class="dashboard__empty muted">
+          Once you finish an interview, your score will appear here.
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</section>
+
