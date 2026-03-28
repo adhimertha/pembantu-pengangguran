@@ -1,11 +1,17 @@
 <section class="interview container animate-fade-in">
+  <div *ngIf="error" class="formError" role="alert">{{ error }}</div>
+
   <div class="card interview__card">
     <header class="interview__header">
       <div class="interview__persona">
-        <div class="interview__avatar" aria-hidden="true">{{ persona.avatar }}</div>
+        <div class="interview__avatar" aria-hidden="true">
+          {{ persona.name ? persona.name[0] : 'I' }}
+        </div>
         <div class="interview__personaText">
           <div class="interview__name">{{ persona.name }}</div>
-          <div class="interview__role">{{ persona.role }} • {{ persona.company }}</div>
+          <div class="interview__role">
+            {{ persona.style }}<span *ngIf="companyLabel"> • {{ companyLabel }}</span>
+          </div>
         </div>
       </div>
 

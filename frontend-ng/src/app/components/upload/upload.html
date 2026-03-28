@@ -7,20 +7,20 @@
 
     <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="upload__form">
       <div class="field">
-        <label>1. Upload your CV (PDF / DOCX)</label>
+        <label>1. Upload your CV (PDF)</label>
         <div
           class="dropzone"
           [class.is-selected]="uploadForm.get('cv')?.value"
           [class.is-selected-border]="uploadForm.get('cv')?.value"
         >
-          <input type="file" (change)="onFileChange($event)" accept=".pdf,.docx" />
+          <input type="file" (change)="onFileChange($event)" accept=".pdf" />
 
           <div class="dropzone__content">
             <div class="dropzone__icon" aria-hidden="true">📄</div>
 
             <div *ngIf="!uploadForm.get('cv')?.value">
               <div class="dropzone__title">Click to select your CV</div>
-              <div class="dropzone__hint muted">PDF or DOCX (max 10MB)</div>
+              <div class="dropzone__hint muted">PDF (max 10MB)</div>
             </div>
 
             <div *ngIf="uploadForm.get('cv')?.value" class="dropzone__selected">
@@ -94,8 +94,14 @@
         </div>
       </div>
 
-      <button type="submit" [disabled]="uploadForm.invalid" class="btn btn--primary upload__submit">
-        Initialize AI Interviewer
+      <div *ngIf="error" class="formError" role="alert">{{ error }}</div>
+
+      <button
+        type="submit"
+        [disabled]="uploadForm.invalid || isSubmitting"
+        class="btn btn--primary upload__submit"
+      >
+        {{ isSubmitting ? 'Starting...' : 'Initialize AI Interviewer' }}
       </button>
     </form>
   </div>

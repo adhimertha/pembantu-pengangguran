@@ -75,6 +75,7 @@ func (ctrl *InterviewController) StartInterview(c *gin.Context) {
 		SessionID:          session.ID,
 		InterviewerPersona: persona,
 		FirstQuestion:      firstQuestion,
+		FirstQuestionID:    question.ID,
 		Status:             "started",
 	}
 
@@ -123,6 +124,7 @@ func (ctrl *InterviewController) RespondToInterview(c *gin.Context) {
 
 	// 4. Generate next question if not complete
 	var nextQuestionText string
+	var nextQuestionID string
 	if !isComplete {
 		// Fetch history
 		var questions []models.InterviewQuestion
@@ -148,6 +150,7 @@ func (ctrl *InterviewController) RespondToInterview(c *gin.Context) {
 			OrderIndex:   len(questions),
 		}
 		database.DB.Create(&nextQ)
+		nextQuestionID = nextQ.ID
 	} else {
 		// Mark session as completed
 		now := time.Now()
@@ -155,9 +158,10 @@ func (ctrl *InterviewController) RespondToInterview(c *gin.Context) {
 	}
 
 	resp := models.RespondResponse{
-		NextQuestion: nextQuestionText,
-		Analysis:     analysis,
-		IsComplete:   isComplete,
+		NextQuestion:   nextQuestionText,
+		NextQuestionID: nextQuestionID,
+		Analysis:       analysis,
+		IsComplete:     isComplete,
 	}
 
 	c.JSON(http.StatusOK, resp)
@@ -223,6 +227,7 @@ func (ctrl *InterviewController) RespondToInterviewAudio(c *gin.Context) {
 	database.DB.Create(&userResponse)
 
 	var nextQuestionText string
+	var nextQuestionID string
 	if !isComplete {
 		var questions []models.InterviewQuestion
 		var responses []models.InterviewResponse
@@ -245,13 +250,15 @@ func (ctrl *InterviewController) RespondToInterviewAudio(c *gin.Context) {
 			OrderIndex:   len(questions),
 		}
 		database.DB.Create(&nextQ)
+		nextQuestionID = nextQ.ID
 	} else {
 		now := time.Now()
 		database.DB.Model(&session).Updates(models.InterviewSession{Status: "completed", CompletedAt: &now})
 	}
 
 	resp := models.RespondResponse{
-		NextQuestion: nextQuestionText,
+		NextQuestion:   nextQuestionText,
+		NextQuestionID: nextQuestionID,
 		Analysis: map[string]interface{}{
 			"transcript": transcript,
 			"analysis":   analysis,

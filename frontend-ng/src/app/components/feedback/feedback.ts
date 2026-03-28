@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ApiClient, FeedbackResponse } from '../../services/api.client';
 
 interface FeedbackData {
   overallScore: number;
@@ -31,55 +32,75 @@ const STORAGE_KEY = 'aiit:sessions';
 export class Feedback implements OnInit {
   sessionId: string | null = null;
   today: Date = new Date();
+  isLoading = true;
+  error: string | null = null;
   feedback: FeedbackData = {
-    overallScore: 78,
-    categories: [
-      {
-        name: 'Technical Depth',
-        score: 85,
-        analysis:
-          'You showed strong understanding of system design principles and were able to articulate complex trade-offs clearly.',
-      },
-      {
-        name: 'Communication',
-        score: 72,
-        analysis:
-          'Your explanations are clear, but you could benefit from being more concise in your opening statements.',
-      },
-      {
-        name: 'Cultural Fit',
-        score: 77,
-        analysis:
-          'You align well with the company values, especially regarding ownership and curiosity.',
-      },
-    ],
-    strengths: [
-      'Strong problem-solving methodology',
-      'Clear articulation of technical trade-offs',
-      'Positive and professional attitude',
-    ],
-    improvements: [
-      'Provide more specific examples using the STAR method',
-      'Keep behavioral answers under 2 minutes',
-      'Ask more insightful questions about the team structure',
-    ],
+    overallScore: 0,
+    categories: [],
+    strengths: [],
+    improvements: [],
   };
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private api: ApiClient,
+  ) {}
 
   ngOnInit() {
     this.sessionId = this.route.snapshot.paramMap.get('id');
-    if (this.sessionId) {
-      this.saveSession({
-        id: this.sessionId,
-        createdAt: new Date().toISOString(),
-        overallScore: this.feedback.overallScore,
-      });
+    if (!this.sessionId) {
+      this.error = 'Missing session id.';
+      this.isLoading = false;
+      return;
     }
+
+    this.isLoading = true;
+    this.error = null;
+    this.api.generateFeedback({ session_id: this.sessionId }).subscribe({
+      next: (resp) => {
+        this.feedback = this.mapFeedback(resp);
+        this.saveSession({
+          id: this.sessionId!,
+          createdAt: new Date().toISOString(),
+          overallScore: this.feedback.overallScore,
+        });
+        this.isLoading = false;
+      },
+      error: (e: unknown) => {
+        this.error = e instanceof Error ? e.message : 'Failed to load feedback';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  private mapFeedback(resp: FeedbackResponse): FeedbackData {
+    const breakdown = resp.breakdown ?? {};
+    const categories = Object.entries(breakdown).map(([k, v]) => {
+      const name = this.humanizeBreakdownKey(k);
+      const score = typeof v === 'number' ? v : Number(v);
+      return { name, score, analysis: '' };
+    });
+
+    return {
+      overallScore: resp.overall_score ?? 0,
+      categories,
+      strengths: resp.strengths ?? [],
+      improvements: resp.suggestions ?? [],
+    };
+  }
+
+  private humanizeBreakdownKey(key: string) {
+    const map: Record<string, string> = {
+      communication: 'Communication',
+      technical: 'Technical',
+      cultural_fit: 'Cultural Fit',
+    };
+    return map[key] ?? key.replace(/_/g, ' ');
   }
 
   private saveSession(session: StoredSession) {
     try {
+      if (typeof localStorage === 'undefined') return;
       const raw = localStorage.getItem(STORAGE_KEY);
       const existing = raw ? (JSON.parse(raw) as unknown) : [];
       const list = Array.isArray(existing) ? (existing as StoredSession[]) : [];

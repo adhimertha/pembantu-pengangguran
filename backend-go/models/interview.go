@@ -59,6 +59,7 @@ type StartInterviewResponse struct {
 	SessionID          string             `json:"session_id"`
 	InterviewerPersona InterviewerPersona `json:"interviewer_persona"`
 	FirstQuestion      string             `json:"first_question"`
+	FirstQuestionID    string             `json:"first_question_id"`
 	Status             string             `json:"status"`
 }
 
@@ -70,6 +71,7 @@ type RespondRequest struct {
 
 type RespondResponse struct {
 	NextQuestion string                 `json:"next_question"`
+	NextQuestionID string               `json:"next_question_id"`
 	Analysis     map[string]interface{} `json:"analysis"`
 	IsComplete   bool                   `json:"is_complete"`
 }

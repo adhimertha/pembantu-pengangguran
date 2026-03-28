@@ -28,7 +28,10 @@
     </div>
   </div>
 
-  <div class="feedback__grid">
+  <div *ngIf="error" class="formError" role="alert">{{ error }}</div>
+  <div *ngIf="isLoading && !error" class="muted feedback__loading">Loading feedback...</div>
+
+  <div class="feedback__grid" *ngIf="!isLoading && !error">
     <div class="feedback__main">
       <div class="card feedback__section">
         <h3 class="feedback__sectionTitle">Skill Analysis</h3>

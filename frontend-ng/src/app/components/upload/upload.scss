@@ -195,6 +195,15 @@
   font-size: 18px;
 }
 
+.formError {
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.06);
+  color: #b91c1c;
+  font-weight: 700;
+}
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;

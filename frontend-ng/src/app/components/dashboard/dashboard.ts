@@ -66,6 +66,7 @@ export class Dashboard implements OnInit {
 
   private loadSessions(): StoredSession[] {
     try {
+      if (typeof localStorage === 'undefined') return [];
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw) as unknown;
@@ -90,4 +91,3 @@ export class Dashboard implements OnInit {
     }
   }
 }
-
