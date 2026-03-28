@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	Port         string
-	OpenAIAPIKey string
+	GeminiAPIKey string
 	DatabaseURL  string
 }
 
@@ -20,7 +20,7 @@ func LoadConfig() *Config {
 
 	return &Config{
 		Port:         getEnv("PORT", "8080"),
-		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
+		GeminiAPIKey: getEnv("GEMINI_API_KEY", ""),
 		DatabaseURL:  getEnv("DATABASE_URL", ""),
 	}
 }
